@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postgres": "docker run --rm --name ubqt-postgres -e POSTGRES_USER=ui_test -e POSTGRES_PASSWORD=ui_test -e POSTGRES_DB=ui_test -p 5432:5432 -d postgres"
   },
   "author": "Chunting Wu",
   "license": "MIT",
