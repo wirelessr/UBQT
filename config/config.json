@@ -1,0 +1,10 @@
+{
+  "rdb": {
+    "dialect": "postgres",
+    "host": "127.0.0.1",
+    "post": 5432,
+    "user": "ui_test",
+    "pwd": "ui_test",
+    "database": "ui_test"
+  }
+}
