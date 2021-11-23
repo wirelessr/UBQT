@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "lint": "eslint .",
-    "postgres": "docker run --rm --name ubqt-postgres -e POSTGRES_USER=ui_test -e POSTGRES_PASSWORD=ui_test -e POSTGRES_DB=ui_test -p 5432:5432 -d postgres"
+    "postgres": "docker run --rm --name ubqt-postgres -e POSTGRES_USER=ui_test -e POSTGRES_PASSWORD=ui_test -e POSTGRES_DB=ui_test -p 5432:5432 -d postgres",
+    "migrate": "node migrate.js"
   },
   "author": "Chunting Wu",
   "license": "MIT",
@@ -17,5 +18,9 @@
     "eslint-plugin-prettier": "^4.0.0",
     "mocha": "^9.1.3",
     "prettier": "^2.4.1"
+  },
+  "dependencies": {
+    "pg": "^8.7.1",
+    "sequelize": "^6.12.0-alpha.1"
   }
 }
