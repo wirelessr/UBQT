@@ -6,6 +6,7 @@ initSequelize(config.rdb);
 const chaiHttp = require("chai-http");
 const chai = require("chai");
 const app = require("../");
+const auth = require("../auth");
 
 const userRepo = require("../user/repo");
 
@@ -34,6 +35,9 @@ describe("user.repo.testsuite", () => {
   });
 
   it("user.repo.list", async () => {
+    const empty = await userRepo.listUser();
+    expect(empty).to.deep.equal([]);
+
     const acct1 = faker.datatype.string(10);
     const pwd1 = faker.datatype.string(10);
     const fullname1 = faker.datatype.string(10);
@@ -146,5 +150,41 @@ describe("user.controller.testsuite", async () => {
       .send({ user, password });
     expect(res2.statusCode).to.be.equal(200);
     expect(res2.body.token).to.be.string;
+  });
+
+  it("user.controller.list", async () => {
+    const noauth = await chai.request(app).get("/user/list");
+    expect(noauth.statusCode).to.be.equal(401);
+
+    const res = await chai
+      .request(app)
+      .get("/user/list")
+      .set("Authorization", `Bearer ${auth.sign({})}`);
+    expect(res.statusCode).to.be.equal(200);
+    expect(res.body).to.deep.equal([]);
+  });
+
+  it("user.controller.search", async () => {
+    const noauth = await chai.request(app).get("/user/search/none");
+    expect(noauth.statusCode).to.be.equal(401);
+
+    const user = faker.datatype.string(10);
+    const password = faker.datatype.string(10);
+    const fullname = faker.datatype.string(10);
+    await userRepo.createUser(user, password, fullname);
+
+    const none = await chai
+      .request(app)
+      .get("/user/search/none")
+      .set("Authorization", `Bearer ${auth.sign({})}`);
+    expect(none.statusCode).to.be.equal(200);
+    expect(none.body).to.deep.equal({});
+
+    const res = await chai
+      .request(app)
+      .get(`/user/search/${fullname}`)
+      .set("Authorization", `Bearer ${auth.sign({})}`);
+    expect(res.statusCode).to.be.equal(200);
+    expect(res.body.acct).to.deep.equal(user);
   });
 });

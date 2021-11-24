@@ -14,7 +14,7 @@ const self = {
 
     const body = signUpSchema.validate(req.body);
     if (body.error) {
-      return res.status(400).send();
+      res.sendStatus(400);
     }
     let ret;
     try {
@@ -24,7 +24,7 @@ const self = {
         body.value.fullname
       );
     } catch (err) {
-      res.status(500).send();
+      res.sendStatus(500);
     }
 
     res.send({
@@ -39,7 +39,7 @@ const self = {
 
     const body = signInSchema.validate(req.body);
     if (body.error) {
-      return res.status(400).send();
+      res.sendStatus(400);
     }
 
     let passed = false;
@@ -47,15 +47,34 @@ const self = {
     try {
       passed = await repo.verifyUser(body.value.user, body.value.password);
     } catch (err) {
-      res.status(500).send();
+      res.sendStatus(500);
     }
     if (!passed) {
-      return res.status(401).send();
+      res.sendStatus(401);
     }
 
     res.send({
       token: auth.sign({ acct: body.value.user })
     });
+  },
+  list: async (req, res) => {
+    let result;
+    try {
+      result = await repo.listUser();
+    } catch (err) {
+      res.sendStatus(500);
+    }
+    res.send(result);
+  },
+  searchByFullName: async (req, res) => {
+    const fullname = req.params.fullname;
+    let result;
+    try {
+      result = await repo.searchUser("fullname", fullname);
+    } catch (err) {
+      res.sendStatus(500);
+    }
+    res.send(result);
   }
 };
 

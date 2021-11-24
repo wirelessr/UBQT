@@ -31,14 +31,18 @@ describe("auth.testsuite", () => {
       constructor(expectedStatus) {
         this.expectedStatus = expectedStatus;
       }
-      status(code) {
+      sendStatus(code) {
         expect(code).to.be.equal(this.expectedStatus);
       }
     }
     // no header
-    auth.verifyMiddleware(new FakeReq(undefined), new FakeRsp(401));
+    auth.verifyMiddleware(new FakeReq(undefined), new FakeRsp(401), () => {});
     // wrong token
-    auth.verifyMiddleware(new FakeReq("wrong token"), new FakeRsp(401));
+    auth.verifyMiddleware(
+      new FakeReq("wrong token"),
+      new FakeRsp(401),
+      () => {}
+    );
     // right token
     const token = auth.sign({ foo: "bar" });
     calledCount = 0;
