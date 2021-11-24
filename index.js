@@ -19,10 +19,12 @@ const user = require("./user");
 app.use("/user", user);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send({ Hello: "World" });
 });
 
 const afterListen = async () => {
   console.log(`starting on port ${port}`);
 };
-app.listen(port, afterListen);
+const server = app.listen(port, afterListen);
+
+module.exports = server;

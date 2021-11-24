@@ -11,7 +11,6 @@ const self = {
       password: Joi.string().min(1).max(100).required(),
       fullname: Joi.string().min(1).max(100).required()
     });
-    console.log(req.body);
 
     const body = signUpSchema.validate(req.body);
     if (body.error) {
@@ -30,6 +29,32 @@ const self = {
 
     res.send({
       token: auth.sign({ acct: ret.acct })
+    });
+  },
+  signIn: async (req, res) => {
+    const signInSchema = Joi.object({
+      user: Joi.string().min(1).max(100).required(),
+      password: Joi.string().min(1).max(100).required()
+    });
+
+    const body = signInSchema.validate(req.body);
+    if (body.error) {
+      return res.status(400).send();
+    }
+
+    let passed = false;
+
+    try {
+      passed = await repo.verifyUser(body.value.user, body.value.password);
+    } catch (err) {
+      res.status(500).send();
+    }
+    if (!passed) {
+      return res.status(401).send();
+    }
+
+    res.send({
+      token: auth.sign({ acct: body.value.user })
     });
   }
 };
