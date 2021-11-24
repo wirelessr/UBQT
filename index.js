@@ -4,6 +4,11 @@ const app = express();
 const port = 3000;
 const bodyParser = require("body-parser");
 
+const { initSequelize } = require("./db");
+const config = require("./config");
+initSequelize(config.rdb);
+require("./model");
+
 app.use(bodyParser.json());
 
 function errorHandler(err, req, res, next) {
@@ -17,6 +22,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});
+const afterListen = async () => {
+  console.log(`starting on port ${port}`);
+};
+app.listen(port, afterListen);
