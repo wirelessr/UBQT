@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ui_test
+      POSTGRES_PASSWORD: ui_test
+      POSTGRES_DB: ui_test
+
+  api:
+    build: .
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      POSTGRES_HOST: db
+
+
+
