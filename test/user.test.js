@@ -254,4 +254,28 @@ describe("user.controller.testsuite", async () => {
     const deleted = await userRepo.searchUser("acct", user);
     expect(deleted).to.be.null;
   });
+
+  it("user.controller.detail", async () => {
+    const noauth = await chai.request(app).get("/user/detail");
+    expect(noauth.statusCode).to.be.equal(401);
+
+    const user = faker.datatype.string(10);
+    const password = faker.datatype.string(10);
+    const fullname = faker.datatype.string(10);
+    await userRepo.createUser(user, password, fullname);
+
+    const noacct = await chai
+      .request(app)
+      .get("/user/detail")
+      .set("Authorization", `Bearer ${auth.sign({})}`);
+    expect(noacct.statusCode).to.be.equal(200);
+    expect(noacct.body).to.deep.equal({});
+
+    const hasacct = await chai
+      .request(app)
+      .get("/user/detail")
+      .set("Authorization", `Bearer ${auth.sign({ acct: user })}`);
+    expect(hasacct.statusCode).to.be.equal(200);
+    expect(hasacct.body.fullname).to.be.equal(fullname);
+  });
 });

@@ -10,5 +10,6 @@ router.get(
   auth.verifyMiddleware,
   controller.searchByFullName
 );
+router.get("/detail", auth.verifyMiddleware, controller.detail);
 
 module.exports = router;

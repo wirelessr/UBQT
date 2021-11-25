@@ -102,6 +102,17 @@ const self = {
       return res.sendStatus(500);
     }
     res.sendStatus(200);
+  },
+  detail: async (req, res) => {
+    const acct = req.decoded.acct ?? "";
+
+    let result;
+    try {
+      result = await repo.searchUser("acct", acct);
+    } catch (err) {
+      return res.sendStatus(500);
+    }
+    res.send(result);
   }
 };
 
