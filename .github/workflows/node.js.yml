@@ -1,0 +1,46 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [feat/express, feat/impl-api]
+  pull_request:
+    branches: [feat/express, feat/impl-api]
+
+jobs:
+  vm-job:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: ui_test
+          POSTGRES_PASSWORD: ui_test
+          POSTGRES_DB: ui_test
+        ports:
+          # will assign a random free host port
+          - 5432/tcp
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run migrate
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+      - run: npm run test
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}

@@ -4,7 +4,7 @@
   "description": "for interview",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --exit",
     "lint": "eslint .",
     "postgres": "docker run --rm --name ubqt-postgres -e POSTGRES_USER=ui_test -e POSTGRES_PASSWORD=ui_test -e POSTGRES_DB=ui_test -p 5432:5432 -d postgres",
     "migrate": "node migrate.js"
@@ -13,13 +13,19 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "faker": "^5.5.3",
     "mocha": "^9.1.3",
     "prettier": "^2.4.1"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "joi": "^17.4.2",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.1",
     "sequelize": "^6.12.0-alpha.1"
   }
