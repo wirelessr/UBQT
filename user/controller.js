@@ -58,9 +58,24 @@ const self = {
     });
   },
   list: async (req, res) => {
+    const listSchema = Joi.object({
+      order: Joi.string().optional(),
+      page: Joi.number().integer().positive().optional(),
+      size: Joi.number().integer().positive().optional()
+    });
+
+    const query = listSchema.validate(req.query);
+    if (query.error) {
+      return res.sendStatus(400);
+    }
+
     let result;
     try {
-      result = await repo.listUser();
+      result = await repo.listUser(
+        query.value.order,
+        query.value.page,
+        query.value.size
+      );
     } catch (err) {
       return res.sendStatus(500);
     }

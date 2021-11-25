@@ -29,11 +29,20 @@ const self = {
     }
     return await bcrypt.compare(pwd, result.pwd);
   },
-  listUser: async () => {
-    const result = await model.Users.findAll({
+  listUser: async (order = null, page = null, size = null) => {
+    const params = {
       attributes: detailAttr,
       raw: true
-    });
+    };
+
+    if (detailAttr.includes(order)) {
+      Object.assign(params, { order: [[order, "DESC"]] });
+    }
+    if (page && size) {
+      Object.assign(params, { limit: size, offset: (page - 1) * size });
+    }
+
+    const result = await model.Users.findAll(params);
     return result;
   },
   searchUser: async (key, value) => {

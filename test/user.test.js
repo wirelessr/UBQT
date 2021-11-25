@@ -12,6 +12,14 @@ const userRepo = require("../user/repo");
 
 chai.use(chaiHttp);
 
+const createFakeUser = async (user = null, password = null, name = null) => {
+  const acct = user ?? faker.datatype.string(10);
+  const pwd = password ?? faker.datatype.string(10);
+  const fullname = name ?? faker.datatype.string(10);
+  await userRepo.createUser(acct, pwd, fullname);
+  return [acct, pwd, fullname];
+};
+
 describe("user.repo.testsuite", () => {
   afterEach(async () => {
     await userRepo.flushUser();
@@ -38,15 +46,8 @@ describe("user.repo.testsuite", () => {
     const empty = await userRepo.listUser();
     expect(empty).to.deep.equal([]);
 
-    const acct1 = faker.datatype.string(10);
-    const pwd1 = faker.datatype.string(10);
-    const fullname1 = faker.datatype.string(10);
-    await userRepo.createUser(acct1, pwd1, fullname1);
-
-    const acct2 = faker.datatype.string(10);
-    const pwd2 = faker.datatype.string(10);
-    const fullname2 = faker.datatype.string(10);
-    await userRepo.createUser(acct2, pwd2, fullname2);
+    const [acct1, pwd1, fullname1] = await createFakeUser();
+    const [acct2, pwd2, fullname2] = await createFakeUser();
 
     const result = await userRepo.listUser();
     expect(result).to.be.length(2);
@@ -55,11 +56,19 @@ describe("user.repo.testsuite", () => {
     );
   });
 
+  it("user.repo.list.sort.and.page", async () => {
+    const suffix = faker.datatype.string(10);
+    const [acct1, pwd1, fullname1] = await createFakeUser(`A${suffix}`);
+    const [acct2, pwd2, fullname2] = await createFakeUser(`B${suffix}`);
+    const [acct3, pwd3, fullname3] = await createFakeUser(`C${suffix}`);
+
+    const result = await userRepo.listUser("acct", 2, 2);
+    expect(result).to.be.length(1);
+    expect(result[0].fullname).to.be.equal(fullname1);
+  });
+
   it("user.repo.search", async () => {
-    const acct1 = faker.datatype.string(10);
-    const pwd1 = faker.datatype.string(10);
-    const fullname1 = faker.datatype.string(10);
-    await userRepo.createUser(acct1, pwd1, fullname1);
+    const [acct1, pwd1, fullname1] = await createFakeUser();
 
     const byFullName = await userRepo.searchUser("fullname", fullname1);
     const byAcct = await userRepo.searchUser("acct", acct1);
@@ -70,10 +79,7 @@ describe("user.repo.testsuite", () => {
   });
 
   it("user.repo.delete", async () => {
-    const acct1 = faker.datatype.string(10);
-    const pwd1 = faker.datatype.string(10);
-    const fullname1 = faker.datatype.string(10);
-    await userRepo.createUser(acct1, pwd1, fullname1);
+    const [acct1, pwd1, fullname1] = await createFakeUser();
 
     await userRepo.deleteUser(acct1);
     const empty = await userRepo.listUser();
@@ -81,12 +87,9 @@ describe("user.repo.testsuite", () => {
   });
 
   it("user.repo.update", async () => {
-    const acct1 = faker.datatype.string(10);
-    const pwd1 = faker.datatype.string(10);
+    const [acct1, pwd1, fullname1] = await createFakeUser();
     const pwd2 = faker.datatype.string(10);
-    const fullname1 = faker.datatype.string(10);
     const fullname2 = faker.datatype.string(10);
-    await userRepo.createUser(acct1, pwd1, fullname1);
 
     const r1 = await userRepo.searchUser("acct", acct1);
     expect(r1.fullname).to.be.equal(fullname1);
@@ -152,10 +155,7 @@ describe("user.controller.testsuite", async () => {
     expect(res1.statusCode).to.be.equal(400);
 
     // correct
-    const user = faker.datatype.string(10);
-    const password = faker.datatype.string(10);
-    const fullname = faker.datatype.string(10);
-    await userRepo.createUser(user, password, fullname);
+    const [user, password, fullname] = await createFakeUser();
     const res2 = await chai
       .request(app)
       .post("/user/sign_in")
@@ -177,14 +177,27 @@ describe("user.controller.testsuite", async () => {
     expect(res.body).to.deep.equal([]);
   });
 
+  it("user.controller.list.sort.and.page", async () => {
+    const suffix = faker.datatype.string(10);
+    const [acct1, pwd1, fullname1] = await createFakeUser(`C${suffix}`);
+    const [acct2, pwd2, fullname2] = await createFakeUser(`B${suffix}`);
+    const [acct3, pwd3, fullname3] = await createFakeUser(`A${suffix}`);
+
+    const res = await chai
+      .request(app)
+      .get("/user/list")
+      .set("Authorization", `Bearer ${auth.sign({})}`)
+      .query({ order: "acct", page: 2, size: 2 });
+    expect(res.statusCode).to.be.equal(200);
+    expect(res.body).to.be.length(1);
+    expect(res.body[0].fullname).to.be.equal(fullname3);
+  });
+
   it("user.controller.search", async () => {
     const noauth = await chai.request(app).get("/user/search/none");
     expect(noauth.statusCode).to.be.equal(401);
 
-    const user = faker.datatype.string(10);
-    const password = faker.datatype.string(10);
-    const fullname = faker.datatype.string(10);
-    await userRepo.createUser(user, password, fullname);
+    const [user, password, fullname] = await createFakeUser();
 
     const none = await chai
       .request(app)
@@ -205,10 +218,7 @@ describe("user.controller.testsuite", async () => {
     const noauth = await chai.request(app).put("/user/update");
     expect(noauth.statusCode).to.be.equal(401);
 
-    const user = faker.datatype.string(10);
-    const password = faker.datatype.string(10);
-    const fullname = faker.datatype.string(10);
-    await userRepo.createUser(user, password, fullname);
+    const [user, password, fullname] = await createFakeUser();
 
     const invalid = await chai
       .request(app)
@@ -241,10 +251,7 @@ describe("user.controller.testsuite", async () => {
     const noauth = await chai.request(app).delete("/user/delete");
     expect(noauth.statusCode).to.be.equal(401);
 
-    const user = faker.datatype.string(10);
-    const password = faker.datatype.string(10);
-    const fullname = faker.datatype.string(10);
-    await userRepo.createUser(user, password, fullname);
+    const [user, password, fullname] = await createFakeUser();
 
     const hasuser = await chai
       .request(app)
@@ -259,10 +266,7 @@ describe("user.controller.testsuite", async () => {
     const noauth = await chai.request(app).get("/user/detail");
     expect(noauth.statusCode).to.be.equal(401);
 
-    const user = faker.datatype.string(10);
-    const password = faker.datatype.string(10);
-    const fullname = faker.datatype.string(10);
-    await userRepo.createUser(user, password, fullname);
+    const [user, password, fullname] = await createFakeUser();
 
     const noacct = await chai
       .request(app)
