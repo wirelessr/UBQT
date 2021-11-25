@@ -117,7 +117,7 @@ describe("user.controller.testsuite", async () => {
     expect(res.body).to.deep.equal({ Hello: "World" });
   });
 
-  xit("user.controller.signup", async () => {
+  it("user.controller.signup", async () => {
     // wrong params
     const res1 = await chai
       .request(app)
