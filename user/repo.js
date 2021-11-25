@@ -47,7 +47,20 @@ const self = {
   deleteUser: async (user) => {
     await model.Users.destroy({ where: { acct: user } });
   },
-  updateUser: async (user, params) => {
+  updateUser: async (user, password = null, fullname = null) => {
+    const params = {};
+
+    if (!password && !fullname) {
+      return;
+    }
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      params.pwd = await bcrypt.hash(password, salt);
+    }
+    if (fullname) {
+      params.fullname = fullname;
+    }
     await model.Users.update(params, { where: { acct: user } });
   }
 };

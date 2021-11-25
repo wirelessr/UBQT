@@ -64,6 +64,9 @@ describe("user.repo.testsuite", () => {
     const byFullName = await userRepo.searchUser("fullname", fullname1);
     const byAcct = await userRepo.searchUser("acct", acct1);
     expect(byFullName).to.deep.equal(byAcct);
+
+    const nouser = await userRepo.searchUser("acct", "no such user");
+    expect(nouser).to.be.null;
   });
 
   it("user.repo.delete", async () => {
@@ -80,6 +83,7 @@ describe("user.repo.testsuite", () => {
   it("user.repo.update", async () => {
     const acct1 = faker.datatype.string(10);
     const pwd1 = faker.datatype.string(10);
+    const pwd2 = faker.datatype.string(10);
     const fullname1 = faker.datatype.string(10);
     const fullname2 = faker.datatype.string(10);
     await userRepo.createUser(acct1, pwd1, fullname1);
@@ -87,9 +91,18 @@ describe("user.repo.testsuite", () => {
     const r1 = await userRepo.searchUser("acct", acct1);
     expect(r1.fullname).to.be.equal(fullname1);
 
-    await userRepo.updateUser(acct1, { fullname: fullname2 });
+    // update fullname
+    await userRepo.updateUser(acct1, null, fullname2);
     const r2 = await userRepo.searchUser("acct", acct1);
     expect(r2.fullname).to.be.equal(fullname2);
+    expect(r1.pwd).to.be.equal(r2.pwd);
+
+    // update password
+    await userRepo.updateUser(acct1, pwd2, null);
+    const r3 = await userRepo.searchUser("acct", acct1);
+    expect(r3.fullname).to.be.equal(fullname2);
+    const passed = await userRepo.verifyUser(acct1, pwd2);
+    expect(passed).to.be.true;
   });
 });
 
@@ -182,9 +195,63 @@ describe("user.controller.testsuite", async () => {
 
     const res = await chai
       .request(app)
-      .get(`/user/search/${fullname}`)
+      .get(encodeURI(`/user/search/${fullname}`))
       .set("Authorization", `Bearer ${auth.sign({})}`);
     expect(res.statusCode).to.be.equal(200);
     expect(res.body.acct).to.deep.equal(user);
+  });
+
+  it("user.controller.update", async () => {
+    const noauth = await chai.request(app).put("/user/update");
+    expect(noauth.statusCode).to.be.equal(401);
+
+    const user = faker.datatype.string(10);
+    const password = faker.datatype.string(10);
+    const fullname = faker.datatype.string(10);
+    await userRepo.createUser(user, password, fullname);
+
+    const invalid = await chai
+      .request(app)
+      .put("/user/update")
+      .set("Authorization", `Bearer ${auth.sign({})}`)
+      .send({ foo: "bar" });
+    expect(invalid.statusCode).to.be.equal(400);
+
+    const fullname2 = faker.datatype.string(10);
+    const noacct = await chai
+      .request(app)
+      .put("/user/update")
+      .set("Authorization", `Bearer ${auth.sign({})}`)
+      .send({ fullname: fullname2 });
+    expect(noacct.statusCode).to.be.equal(200);
+    const orig = await userRepo.searchUser("acct", user);
+    expect(orig.fullname).to.be.equal(fullname);
+
+    const hasuser = await chai
+      .request(app)
+      .put("/user/update")
+      .set("Authorization", `Bearer ${auth.sign({ acct: user })}`)
+      .send({ fullname: fullname2 });
+    expect(hasuser.statusCode).to.be.equal(200);
+    const updated = await userRepo.searchUser("acct", user);
+    expect(updated.fullname).to.be.equal(fullname2);
+  });
+
+  it("user.controller.delete", async () => {
+    const noauth = await chai.request(app).delete("/user/delete");
+    expect(noauth.statusCode).to.be.equal(401);
+
+    const user = faker.datatype.string(10);
+    const password = faker.datatype.string(10);
+    const fullname = faker.datatype.string(10);
+    await userRepo.createUser(user, password, fullname);
+
+    const hasuser = await chai
+      .request(app)
+      .delete("/user/delete")
+      .set("Authorization", `Bearer ${auth.sign({ acct: user })}`);
+    expect(hasuser.statusCode).to.be.equal(200);
+    const deleted = await userRepo.searchUser("acct", user);
+    expect(deleted).to.be.null;
   });
 });

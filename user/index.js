@@ -12,5 +12,7 @@ router.get(
   auth.verifyMiddleware,
   controller.searchByFullName
 );
+router.put("/update", auth.verifyMiddleware, controller.update);
+router.delete("/delete", auth.verifyMiddleware, controller.delete);
 
 module.exports = router;

@@ -27,11 +27,11 @@ const self = {
     const h = req.header("Authorization") ?? "";
     const token = h.replace("Bearer ", "");
     if (!token) {
-      res.sendStatus(401);
+      return res.sendStatus(401);
     }
     const decoded = self.decode(token);
     if (!decoded) {
-      res.sendStatus(401);
+      return res.sendStatus(401);
     }
     Object.assign(req, { decoded });
     next();
