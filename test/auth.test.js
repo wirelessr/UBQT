@@ -23,6 +23,7 @@ describe("auth.testsuite", () => {
       constructor(token) {
         this.token = token;
       }
+      // eslint-disable-next-line no-unused-vars
       header(key) {
         return this.token;
       }
@@ -45,7 +46,7 @@ describe("auth.testsuite", () => {
     );
     // right token
     const token = auth.sign({ foo: "bar" });
-    calledCount = 0;
+    let calledCount = 0;
     auth.verifyMiddleware(new FakeReq(`Bearer ${token}`), null, () => {
       calledCount++;
     });

@@ -11,6 +11,7 @@ require("./model");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   res.status(500).send({ error: err });
 }
