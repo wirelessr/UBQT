@@ -67,7 +67,7 @@ const self = {
     res.send(result);
   },
   searchByFullName: async (req, res) => {
-    const fullname = decodeURI(req.params.fullname);
+    const fullname = decodeURIComponent(req.params.fullname);
     let result;
     try {
       result = await repo.searchUser("fullname", fullname);

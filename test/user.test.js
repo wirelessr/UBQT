@@ -195,7 +195,7 @@ describe("user.controller.testsuite", async () => {
 
     const res = await chai
       .request(app)
-      .get(encodeURI(`/user/search/${fullname}`))
+      .get(`/user/search/${encodeURIComponent(fullname)}`)
       .set("Authorization", `Bearer ${auth.sign({})}`);
     expect(res.statusCode).to.be.equal(200);
     expect(res.body.acct).to.deep.equal(user);
