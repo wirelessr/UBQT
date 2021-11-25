@@ -9,5 +9,5 @@ module.exports = {
     "ecmaVersion": 12
   },
   "rules": {},
-  "ignorePatterns": ["models/*", "addons/**/models/*"]
+  "ignorePatterns": ["test/*"]
 };

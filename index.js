@@ -8,6 +8,9 @@ const config = require("./config");
 initSequelize(config.rdb);
 require("./model");
 
+const helmet = require("helmet");
+app.use(helmet());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
