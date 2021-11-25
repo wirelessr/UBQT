@@ -201,7 +201,7 @@ describe("user.controller.testsuite", async () => {
     expect(res.body.acct).to.deep.equal(user);
   });
 
-  xit("user.controller.update", async () => {
+  it("user.controller.update", async () => {
     const noauth = await chai.request(app).put("/user/update");
     expect(noauth.statusCode).to.be.equal(401);
 
