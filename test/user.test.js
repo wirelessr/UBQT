@@ -237,7 +237,7 @@ describe("user.controller.testsuite", async () => {
     expect(updated.fullname).to.be.equal(fullname2);
   });
 
-  xit("user.controller.delete", async () => {
+  it("user.controller.delete", async () => {
     const noauth = await chai.request(app).delete("/user/delete");
     expect(noauth.statusCode).to.be.equal(401);
 
