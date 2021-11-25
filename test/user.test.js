@@ -177,7 +177,7 @@ describe("user.controller.testsuite", async () => {
     expect(res.body).to.deep.equal([]);
   });
 
-  xit("user.controller.search", async () => {
+  it("user.controller.search", async () => {
     const noauth = await chai.request(app).get("/user/search/none");
     expect(noauth.statusCode).to.be.equal(401);
 
