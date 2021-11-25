@@ -12,5 +12,6 @@ router.get(
 );
 router.get("/detail", auth.verifyMiddleware, controller.detail);
 router.post("/sign_up", controller.signUp);
+router.post("/sign_in", controller.signIn);
 
 module.exports = router;

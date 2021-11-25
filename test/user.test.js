@@ -142,7 +142,7 @@ describe("user.controller.testsuite", async () => {
     expect(passed).to.be.true;
   });
 
-  xit("user.controller.signin", async () => {
+  it("user.controller.signin", async () => {
     // wrong params
     const res1 = await chai
       .request(app)
