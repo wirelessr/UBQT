@@ -2,14 +2,14 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const bodyParser = require("body-parser");
 
 const { initSequelize } = require("./db");
 const config = require("./config");
 initSequelize(config.rdb);
 require("./model");
 
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 function errorHandler(err, req, res, next) {
   res.status(500).send({ error: err });
